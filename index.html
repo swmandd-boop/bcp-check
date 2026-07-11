@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>自然災害BCP実効性チェック｜株式会社福祉マネジメント＆デザイン</title>
+<style>
+  :root{
+    --night:#161F33;
+    --night-deep:#0E1524;
+    --paper:#F7F6F2;
+    --ink:#242A35;
+    --sub:#5C6470;
+    --amber:#E39A2D;
+    --ok:#3E7C6F;
+    --risk:#B23A2F;
+    --line:#D9D6CE;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{font-size:16px;color-scheme:light only;background:var(--paper) !important}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic Medium","Yu Gothic",Meiryo,sans-serif;
+    background:var(--paper) !important;
+    color:var(--ink) !important;
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+
+  /* ===== hero ===== */
+  .hero{
+    background:linear-gradient(180deg,var(--night-deep) 0%,var(--night) 100%);
+    color:#EDEAE2;
+    padding:56px 0 48px;
+  }
+  .clock{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    font-size:4.2rem;
+    letter-spacing:.04em;
+    line-height:1;
+    color:var(--amber);
+    margin-bottom:14px;
+  }
+  .clock small{font-size:1rem;font-weight:500;color:#9AA3B3;letter-spacing:.18em;display:block;margin-bottom:8px}
+  .hero h1{font-size:1.5rem;font-weight:700;letter-spacing:.02em;margin-bottom:18px}
+  .hero p{color:#C4C9D4;font-size:.95rem;max-width:34em}
+  .hero .em{color:#EDEAE2;font-weight:700}
+  .badge{
+    display:inline-block;border:1px solid #4A5468;border-radius:3px;
+    font-size:.75rem;letter-spacing:.12em;color:#9AA3B3;
+    padding:3px 10px;margin-bottom:26px;
+  }
+  .scenario-strip{
+    display:grid;gap:8px;margin-top:26px;
+  }
+  .scenario-strip .sc{
+    border:1px solid #313D55;border-radius:6px;padding:10px 14px;
+    font-size:.85rem;color:#C4C9D4;display:flex;align-items:center;gap:10px;
+  }
+  .scenario-strip .sc b{color:var(--amber);font-size:.8rem;letter-spacing:.1em;flex-shrink:0}
+  .scenario-strip .sc .done-mark{margin-left:auto;color:var(--ok);font-weight:700;font-size:.8rem;flex-shrink:0}
+  .start-btn{
+    display:block;width:100%;margin-top:28px;
+    background:var(--amber);color:var(--night-deep);
+    border:none;border-radius:6px;
+    font-size:1.05rem;font-weight:700;letter-spacing:.06em;
+    padding:16px;cursor:pointer;
+    font-family:inherit;
+    transition:transform .15s ease;
+  }
+  .start-btn:hover{transform:translateY(-1px)}
+  .start-btn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  .hero .note{font-size:.78rem;color:#7C8698;margin-top:14px}
+
+  /* ===== facts strip ===== */
+  .facts{border-bottom:1px solid var(--line);padding:26px 0;background:var(--paper)}
+  .facts p{font-size:.88rem;color:var(--sub)}
+  .facts .em{color:var(--ink);font-weight:700}
+
+  /* ===== quiz ===== */
+  .quiz{padding:36px 0 56px;display:none;background:var(--paper)}
+  .quiz .q-text{color:var(--ink) !important}
+  .sc-banner{
+    display:inline-block;background:var(--night);color:#EDEAE2;
+    border-radius:4px;font-size:.78rem;letter-spacing:.1em;
+    padding:4px 12px;margin-bottom:20px;font-weight:700;
+  }
+  .progress{
+    display:flex;align-items:center;gap:12px;margin-bottom:26px;
+  }
+  .progress .bar{
+    flex:1;height:4px;background:#E4E1D9;border-radius:2px;overflow:hidden;
+  }
+  .progress .bar i{
+    display:block;height:100%;background:var(--night);width:0%;
+    transition:width .3s ease;
+  }
+  .progress .num{font-size:.82rem;color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .scene{
+    display:inline-block;background:var(--amber);color:var(--night-deep);
+    font-size:.88rem;letter-spacing:.08em;
+    font-weight:700;padding:6px 16px;border-radius:5px;margin-bottom:16px;
+  }
+  .q-text{font-size:1.15rem;font-weight:700;line-height:1.7;margin-bottom:28px;min-height:5.2em}
+  .opts{display:grid;gap:12px}
+  .opt{
+    text-align:left;background:#fff;border:1.5px solid var(--line);
+    border-radius:8px;padding:15px 18px;font-size:.98rem;
+    cursor:pointer;font-family:inherit;color:var(--ink);
+    transition:border-color .15s ease,background .15s ease;
+    line-height:1.6;
+    -webkit-tap-highlight-color:rgba(22,31,51,.08);
+  }
+  @media (hover:hover) and (pointer:fine){
+    .opt:hover{border-color:var(--night)}
+  }
+  .opt:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  .opt.sel{border-color:var(--night);background:#EFEDE6;box-shadow:inset 0 0 0 1px var(--night)}
+  .opt b{display:block;font-size:1rem}
+  .opt span{font-size:.82rem;color:var(--sub)}
+  .back{
+    margin-top:22px;background:none;border:none;color:var(--sub);
+    font-size:.85rem;cursor:pointer;font-family:inherit;text-decoration:underline;
+  }
+  .back:focus-visible{outline:2px solid var(--night);outline-offset:2px}
+
+  /* ===== result ===== */
+  .result{display:none;padding:44px 0 30px;background:var(--paper)}
+  .r-label{font-size:.8rem;letter-spacing:.16em;color:var(--sub);margin-bottom:6px}
+  .r-scenario{
+    display:inline-block;background:var(--night);color:#EDEAE2;
+    border-radius:4px;font-size:.78rem;letter-spacing:.1em;
+    padding:4px 12px;margin-bottom:16px;font-weight:700;
+  }
+  .r-grade{font-size:1.7rem;font-weight:700;line-height:1.5;margin-bottom:6px}
+  .r-grade .g{font-size:3.2rem;margin-right:10px;vertical-align:-4px}
+  .g-a{color:var(--ok)} .g-b{color:var(--amber)} .g-c{color:var(--risk)}
+  .r-sum{font-size:.95rem;color:var(--sub);margin-bottom:34px}
+  .r-sum .em{color:var(--ink);font-weight:700}
+
+  .axes{display:grid;gap:16px;margin-bottom:36px}
+  .axis .a-head{display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:5px}
+  .axis .a-name{font-weight:700}
+  .axis .a-score{color:var(--sub);font-variant-numeric:tabular-nums}
+  .axis .a-bar{height:10px;background:#E4E1D9;border-radius:5px;overflow:hidden}
+  .axis .a-bar i{display:block;height:100%;border-radius:5px;width:0;transition:width .7s ease}
+  .f-ok{background:var(--ok)} .f-mid{background:var(--amber)} .f-low{background:var(--risk)}
+
+  .weak{
+    background:var(--night);color:#EDEAE2;border-radius:10px;
+    padding:26px 24px;margin-bottom:18px;
+  }
+  .weak .w-label{font-size:.78rem;letter-spacing:.16em;color:var(--amber);font-weight:700;margin-bottom:8px}
+  .weak h2{font-size:1.2rem;margin-bottom:10px}
+  .weak p{font-size:.92rem;color:#C4C9D4}
+  .unknown{
+    border:1.5px solid var(--risk);border-radius:10px;
+    padding:18px 22px;margin-bottom:26px;font-size:.92rem;
+  }
+  .unknown b{color:var(--risk)}
+
+  .scenes-box{
+    background:#fff;border:1.5px solid var(--line);border-radius:10px;
+    padding:22px;margin-bottom:26px;
+  }
+  .scenes-box .sb-title{font-weight:700;font-size:.95rem;margin-bottom:12px}
+  .scenes-box ul{list-style:none;display:grid;gap:8px;margin-bottom:14px}
+  .scenes-box li{
+    font-size:.9rem;padding-left:1.1em;position:relative;line-height:1.6;
+  }
+  .scenes-box li::before{
+    content:"";position:absolute;left:0;top:.55em;
+    width:.5em;height:.5em;border-radius:50%;background:var(--risk);
+  }
+  .scenes-box .sb-note{font-size:.8rem;color:var(--sub)}
+
+  /* ===== next scenario ===== */
+  .next-sc{
+    border:1.5px solid var(--amber);border-radius:10px;
+    padding:22px;margin-bottom:36px;background:#FCF7EC;
+  }
+  .next-sc p{font-size:.9rem;margin-bottom:14px}
+  .next-sc p b{color:var(--ink)}
+  .next-btn{
+    display:block;width:100%;
+    background:var(--amber);color:var(--night-deep);
+    border:none;border-radius:6px;
+    font-size:.98rem;font-weight:700;letter-spacing:.04em;
+    padding:14px;cursor:pointer;font-family:inherit;
+  }
+  .next-btn:focus-visible{outline:3px solid var(--night);outline-offset:2px}
+  .all-done{
+    border:1.5px solid var(--ok);border-radius:10px;
+    padding:22px;margin-bottom:36px;background:#EFF5F2;font-size:.92rem;
+  }
+  .all-done b{color:var(--ok)}
+
+  .cta{
+    border-top:1px solid var(--line);
+    padding:36px 0 20px;
+  }
+  .cta h2{font-size:1.1rem;margin-bottom:12px}
+  .cta p{font-size:.92rem;color:var(--sub);margin-bottom:20px}
+  .cta .firm{font-size:.85rem;color:var(--ink);font-weight:700;margin-bottom:4px}
+  .cta .svc{
+    background:#fff;border:1.5px solid var(--line);border-radius:8px;
+    padding:18px 20px;margin-bottom:14px;
+  }
+  .cta .svc b{display:block;margin-bottom:4px}
+  .cta .svc span{font-size:.85rem;color:var(--sub)}
+  .retry{
+    margin:26px auto 0;display:block;background:none;border:none;
+    color:var(--sub);font-size:.85rem;cursor:pointer;font-family:inherit;
+    text-decoration:underline;
+  }
+  footer{
+    padding:28px 0 44px;border-top:1px solid var(--line);
+    font-size:.75rem;color:var(--sub);background:var(--paper);
+  }
+  .sticky-cta{
+    display:none;
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:rgba(247,246,242,.97);
+    border-top:1px solid var(--line);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow:0 -4px 14px rgba(22,31,51,.08);
+  }
+  .sticky-cta a{
+    display:block;max-width:640px;margin:0 auto;
+    background:var(--night);color:#fff;border-radius:6px;
+    font-size:.92rem;font-weight:700;letter-spacing:.02em;
+    padding:13px;text-align:center;text-decoration:none;line-height:1.5;
+  }
+  .sticky-cta a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+  body.show-sticky footer{padding-bottom:110px}
+  body.show-sticky .result{padding-bottom:40px}
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+  @media (max-width:420px){
+    .clock{font-size:3.4rem}
+    .q-text{font-size:1.05rem}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="wrap">
+    <span class="badge">介護施設向け・無料セルフ診断</span>
+    <div class="clock"><small>もし、今夜だったら。</small>02:00</div>
+    <h1>そのBCPで、利用者と職員を守れますか。</h1>
+    <p>BCPの策定は2024年4月に義務化され、多くの施設が「策定済み」です。<span class="em">しかし災害が問うのは、書類の有無ではなく「そのとき、利用者と職員を守れるか」です。</span>3つのシナリオからランダムに1つが出題されます。10の場面で、貴施設のBCPの実効性を3分で点検してください。</p>
+    <div class="scenario-strip" id="scList"></div>
+    <button class="start-btn" id="startBtn" onclick="startRandom()">診断をはじめる（10問・約3分）</button>
+    <p class="note">場面設定（夜勤者数・部屋数など）は、貴施設の体制に読み替えてお答えください。<br>シナリオはランダムに選ばれます。回答はこの端末内でのみ処理され、外部に送信されません。</p>
+  </div>
+</section>
+
+<section class="facts" id="facts">
+  <div class="wrap">
+    <p>BCP未策定の介護事業所には<span class="em">基本報酬の減算</span>が適用されています。ただし本当のリスクは減算ではなく、<span class="em">「策定したはずの計画が、いざというとき発動しない」</span>こと。そして——<span class="em">1つのシナリオで動けても、別のシナリオで動けるとは限らない</span>ことです。</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="quiz" id="quiz">
+  <div class="wrap">
+    <span class="sc-banner" id="scBanner"></span>
+    <div class="progress">
+      <div class="bar"><i id="pbar"></i></div>
+      <span class="num" id="pnum">1 / 10</span>
+    </div>
+    <p class="scene" id="scene"></p>
+    <p class="q-text" id="qtext"></p>
+    <div class="opts" id="opts"></div>
+    <button class="back" id="backBtn" onclick="goBack()" style="visibility:hidden">← 前の質問に戻る</button>
+  </div>
+</section>
+
+<!-- ============ RESULT ============ -->
+<section class="result" id="result">
+  <div class="wrap">
+    <p class="r-label">診断結果</p>
+    <span class="r-scenario" id="rScenario"></span>
+    <p class="r-grade" id="grade"></p>
+    <p class="r-sum" id="rsum"></p>
+
+    <div class="axes" id="axes"></div>
+
+    <div class="weak" id="weakBox">
+      <p class="w-label">最初に崩れるのはここです</p>
+      <h2 id="weakName"></h2>
+      <p id="weakDesc"></p>
+    </div>
+
+    <div class="unknown" id="unknownBox" style="display:none">
+      「わからない」の回答が <b id="ucount"></b> ありました。非常時の現場では、<b>「わからない」は「できない」と同じ結果</b>になります。まずここが点検の出発点です。
+    </div>
+
+    <div class="scenes-box" id="scenesBox" style="display:none">
+      <p class="sb-title">今回「できない・わからない」だった場面</p>
+      <ul id="scenesList"></ul>
+      <p class="sb-note">この一覧は、防災担当者・リーダー間での共有や、次回のBCP見直し会議の議題としてそのままお使いいただけます。</p>
+    </div>
+
+    <div class="next-sc" id="nextBox" style="display:none">
+      <p><b>ただし、これは1つのシナリオにすぎません。</b><br>
+      避難や参集の計画が整っていても、別の災害・別の局面でそのまま通用するとは限りません。<span id="nextName"></span>のシナリオでも点検してみてください。</p>
+      <button class="next-btn" id="nextBtn"></button>
+    </div>
+
+    <div class="all-done" id="allDoneBox" style="display:none">
+      <b>3シナリオすべての診断が完了しました。</b><br>
+      シナリオごとに弱点が違っていたなら、それこそが「1冊のBCP」では備えきれない理由です。次の一歩は、弱かった場面を職員が実際に「判断してみる」こと——下記の研修がその場になります。
+    </div>
+
+    <div class="cta">
+      <h2>見つかった弱点を、「動ける計画」に変えるには</h2>
+      <p>この診断が示すのは、問題の在り処までです。ここから先——弱かった場面で実際にどう判断し、どう動くか——は、読み合わせでは身につきません。<b>職員が「その場で判断する」経験</b>だけが、紙のBCPを動く計画に変えます。</p>
+      <div class="svc">
+        <b>BCPシミュレーション研修（カード式）</b>
+        <span>災害の進行を模したカードを引きながら、職員がその場で判断し、話し合う実践型の研修です。今回の診断で弱かった場面を、そのまま訓練のテーマにできます。運営基準で義務づけられたBCP研修・訓練の実施記録としても活用いただけます。</span>
+      </div>
+      <p class="firm">株式会社福祉マネジメント＆デザイン</p>
+      <button class="retry" onclick="backToTop()">トップに戻る</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    本診断は一般的なBCP実効性の簡易チェックであり、法令適合性や運営指導の結果を保証するものではありません。<br>
+    &copy; 株式会社福祉マネジメント＆デザイン
+  </div>
+</footer>
+
+<div class="sticky-cta" id="stickyCta">
+  <a href="https://forms.gle/nZd22V4geA5LAGVB8" target="_blank" rel="noopener">コンサルティング・研修のご相談・お申し込み</a>
+</div>
+
+<script>
+// ============================================================
+// シナリオ定義
+//   cats: 5領域（各シナリオで名称・崩れ方の説明を最適化）
+//   qs  : 10問（cat 0-4 に各2問）
+// ============================================================
+const SCENARIOS = [
+{
+  id:"quake",
+  short:"A",
+  title:"深夜の大地震",
+  banner:"シナリオA：深夜2時・震度6強",
+  cats:[
+    {name:"初動・安全確保", desc:"発災直後の数十分、夜勤者だけで利用者の安全を守る局面です。ここが止まると、以降のすべての計画が始まりません。"},
+    {name:"参集・人員体制", desc:"職員が集まらない・連絡がつかない状態で運営を続ける局面です。人が揃う前提の計画は、この段階で紙に戻ります。"},
+    {name:"業務継続・優先業務", desc:"水・電気・物資が限られた中で、ケアの水準をどう保つかの局面です。基準がないと、判断が個人任せになり現場が疲弊します。"},
+    {name:"外部連携", desc:"施設単独の対応が限界を迎え、外へ助けを求める局面です。窓口と連絡先が現場になければ、要請は丸一日遅れます。"},
+    {name:"訓練・見直し", desc:"計画を「知っている人」を増やし、古びさせない仕組みの局面です。ここが弱いと、他の4領域は時間とともに必ず劣化します。"}
+  ],
+  qs:[
+    {cat:0, scene:"深夜2時・震度6強", q:"夜勤者は2名。発災からの10分間に「誰が・何をするか」を、夜勤の職員がすぐ思い浮かべられる状態になっていますか？"},
+    {cat:0, scene:"停電・非常灯のみ", q:"たん吸引や医療機器を使う利用者への対応手順は、電気が使えない暗がりでも「紙で」確認できるよう備えてありますか？"},
+    {cat:1, scene:"発災から1時間", q:"通信が不安定な中でも、職員の安否と参集の見込みを確かめられる連絡の手順は用意されていますか？"},
+    {cat:1, scene:"参集できたのは3割", q:"出勤できた職員が普段の3割ほどだったとき、「どの業務を絞り、誰が何を担うか」は、あらかじめ話し合われていますか？"},
+    {cat:2, scene:"断水3日目", q:"食事・排泄・清潔ケアを「どの水準で続けるか」の目安は、文書として整えられていますか？"},
+    {cat:2, scene:"物資の確認", q:"水・食料・衛生用品の備蓄が「何日分あるか」、おおよそ把握できていますか？"},
+    {cat:3, scene:"停電24時間超", q:"行政・法人本部・電力/水道・協力医療機関——「誰に・何をお願いするか」の窓口と連絡先は、現場ですぐ見られるところにありますか？"},
+    {cat:3, scene:"施設単独では限界", q:"近隣施設や地域との相互応援（利用者の受け入れ・職員の応援など）について、取り決めや申し合わせはありますか？"},
+    {cat:4, scene:"この1年をふり返って", q:"直近1年のうちに、地震を想定したBCPの訓練（机上訓練を含む）を、夜勤者や非常勤の方も交えて行う機会はありましたか？"},
+    {cat:4, scene:"計画の鮮度", q:"BCPは今の体制・職員構成に合わせて見直され、新しく入った職員や夜勤専従の方にも共有されていますか？"}
+  ]
+},
+{
+  id:"rooms",
+  short:"B",
+  title:"窓ガラス破損・居室が使えない",
+  banner:"シナリオB：突風で窓ガラスが破損、複数の居室が使用不能",
+  cats:[
+    {name:"初動・安全確保", desc:"ガラスが飛散し、強風が吹き込む中で、自力で動けない利用者を安全に移す局面です。手順がなければ、二次負傷はここで起きます。"},
+    {name:"代替場所の確保", desc:"「今夜、どこで寝てもらうか」を数十分で決める局面です。優先順位を決めていないと、食堂と廊下が無秩序な避難所になります。"},
+    {name:"尊厳・プライバシー", desc:"共用スペースでの生活が始まった瞬間から、ケアの質が試される局面です。仕切りひとつの備えの有無が、利用者の尊厳と家族からの信頼を左右します。"},
+    {name:"応急復旧・外部連携", desc:"応急養生と修繕手配の速さが、共用スペース生活の長さを決める局面です。連絡先を探すところから始めると、復旧は数日単位で遅れます。"},
+    {name:"訓練・見直し", desc:"「建物の一部が使えなくなる」想定は、避難訓練では扱われにくいBCPの盲点です。検討したことのない事態に、現場は即興で挑むことになります。"}
+  ],
+  qs:[
+    {cat:0, scene:"ガラス飛散・強風が吹き込む", q:"負傷の確認と、ガラスが飛び散った区域からの利用者の退避——最初の数分の動きを、その場にいる職員がイメージできる状態でしょうか？"},
+    {cat:0, scene:"自力で動けない利用者", q:"車いすの方・寝たきりの方を居室から運び出す方法（必要な人数・用具・順番）について、目安は決められていますか？"},
+    {cat:1, scene:"居室4部屋が使用不能に", q:"食堂・機能訓練室・地域交流スペースなど、どこを臨時の生活場所にするか、おおよその優先順位は考えられていますか？"},
+    {cat:1, scene:"今夜の寝床をどうするか", q:"臨時のスペースで使う予備のベッド・マットレス・寝具について、数と保管場所を把握できていますか？"},
+    {cat:2, scene:"共用スペースでの生活開始", q:"パーテーションやカーテンなどで、一人ひとりの空間を仕切れる備え（数や設置の手順）はありますか？"},
+    {cat:2, scene:"排泄・着替えの時間", q:"共用スペースで過ごす間の排泄介助・着替え・清拭について、羞恥心に配慮した場所と手順は考えられていますか？"},
+    {cat:3, scene:"窓から風雨が入り続ける", q:"窓の応急養生（ベニヤ・ブルーシート等）の資材のありかと、修繕をお願いする業者の連絡先は、すぐ動ける状態にありますか？"},
+    {cat:3, scene:"復旧まで2週間かかる見込み", q:"ご家族への説明の段取りと、長引いた場合の一時的な受け入れ相談先（他施設・ショートステイ等）は、あたりがついていますか？"},
+    {cat:4, scene:"この1年をふり返って", q:"居室が使えなくなる事態（ガラス破損・雨漏り・設備の故障など）を想定した検討や訓練を、直近1年のうちに行う機会はありましたか？"},
+    {cat:4, scene:"計画の鮮度", q:"BCPに「生活場所の代替」や「プライバシーの確保」の項目は盛り込まれ、パーテーション等の備品のありかは職員に共有されていますか？"}
+  ]
+},
+{
+  id:"typhoon",
+  short:"C",
+  title:"大型台風・水害",
+  banner:"シナリオC：大型台風、上陸まで48時間",
+  cats:[
+    {name:"事前判断・タイムライン", desc:"台風は「予測できる災害」です。48時間前から動けたかどうかで結果が決まります。ここが弱いと、備えられたはずの被害を受けます。"},
+    {name:"人員体制", desc:"交通停止・道路冠水で「職員が来られない」時間が長く続く局面です。前泊・残留・交代の設計がないと、少数の職員に負荷が集中します。"},
+    {name:"業務継続・設備", desc:"長期停電・断水の中で、非常用電源と備蓄で何をどこまで維持できるかの局面です。「何時間もつか」を知らない設備は、無いのと同じです。"},
+    {name:"避難・地域連携", desc:"施設に留まるか、外へ逃げるかの局面です。避難先・移送手段・受け入れの取り決めがなければ、判断はできても実行ができません。"},
+    {name:"訓練・見直し", desc:"水害対応は、ハザードマップの更新や体制変更で毎年前提が変わります。見直されていない計画は、去年の地形と去年の職員のための計画です。"}
+  ],
+  qs:[
+    {cat:0, scene:"上陸48時間前・進路予報が直撃", q:"「いつ・誰が・何を判断するか」を時系列で整理した事前の行動計画（タイムライン）があり、それに沿って動き始められそうですか？"},
+    {cat:0, scene:"避難情報が発令されたら", q:"施設が浸水想定区域かどうか、垂直避難か施設外避難かの目安を、管理者以外の職員も把握していますか？"},
+    {cat:1, scene:"暴風域・交通は全面停止", q:"職員が出勤しづらくなることを見越した前泊・施設内残留の体制（誰が・何人・どこで）は、あらかじめ考えられていますか？"},
+    {cat:1, scene:"停電・断水が3日目に", q:"長引いた場合に、残っている職員の交代と休息をどう回すか（応援をお願いする目安を含めて）は考えられていますか？"},
+    {cat:2, scene:"非常用電源に切り替え", q:"非常用電源で「何が・何時間動くか」を、医療機器の優先順位も含めて把握できていますか？"},
+    {cat:2, scene:"物資と資機材の確認", q:"水・食料に加えて、避難や移動に必要な資機材（担架・車いす・車両・燃料）の状況は把握できていますか？"},
+    {cat:3, scene:"施設外避難を決断", q:"施設の外へ避難する場合の避難先・移送手段・先方の受け入れについて、事前の取り決めや申し合わせはありますか？"},
+    {cat:3, scene:"高齢者等避難が発令", q:"市町村からの避難情報を確実に受け取り、地域や行政とやり取りできる連絡体制はありますか？"},
+    {cat:4, scene:"この1年をふり返って", q:"直近1年のうちに、風水害を想定した訓練（避難誘導やタイムラインの確認を含む）を行う機会はありましたか？"},
+    {cat:4, scene:"計画の鮮度", q:"水害時の計画（避難確保計画を含む）は、最新のハザードマップと今の体制に合わせて見直されていますか？"}
+  ]
+}
+];
+
+const OPTS = [
+  {label:"できる／ある", sub:"具体的に説明できる・文書と現場が一致している", pt:2, u:false},
+  {label:"一部できる／不安がある", sub:"文書はあるが現場に浸透していない・古い可能性がある", pt:1, u:false},
+  {label:"できない・わからない", sub:"決まっていない、または自分は把握していない", pt:0, u:true}
+];
+
+// ============================================================
+// 状態
+// ============================================================
+let current = null;   // 現在のシナリオ
+let idx = 0;
+let answers = [];
+const doneIds = [];   // 診断済みシナリオid（ページを開いている間のみ保持）
+
+// ヒーローのシナリオ一覧
+function renderScList(){
+  const box = document.getElementById('scList');
+  box.innerHTML = '';
+  SCENARIOS.forEach(s=>{
+    const d = document.createElement('div');
+    d.className = 'sc';
+    d.innerHTML = '<b>'+s.short+'</b>'+s.title+
+      (doneIds.includes(s.id) ? '<span class="done-mark">診断済み ✓</span>' : '');
+    box.appendChild(d);
+  });
+}
+renderScList();
+
+function pickRandom(){
+  const remaining = SCENARIOS.filter(s=>!doneIds.includes(s.id));
+  const pool = remaining.length ? remaining : SCENARIOS;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function startRandom(){ startScenario(pickRandom()); }
+
+function startScenario(s){
+  current = s;
+  idx = 0;
+  answers = [];
+  document.getElementById('hero').style.display='none';
+  document.getElementById('facts').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('stickyCta').style.display='none';
+  document.body.classList.remove('show-sticky');
+  document.getElementById('quiz').style.display='block';
+  document.getElementById('scBanner').textContent = s.banner;
+  render();
+  window.scrollTo(0,0);
+}
+
+function render(){
+  const q = current.qs[idx];
+  document.getElementById('scene').textContent = q.scene;
+  document.getElementById('qtext').textContent = q.q;
+  document.getElementById('pnum').textContent = (idx+1) + " / " + current.qs.length;
+  document.getElementById('pbar').style.width = ((idx+1)/current.qs.length*100) + "%";
+  document.getElementById('backBtn').style.visibility = idx===0 ? 'hidden' : 'visible';
+  const box = document.getElementById('opts');
+  box.innerHTML = '';
+  OPTS.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt' + (answers[idx]===i ? ' sel' : '');
+    b.innerHTML = '<b>'+o.label+'</b><span>'+o.sub+'</span>';
+    b.onclick = ()=>answer(i);
+    box.appendChild(b);
+  });
+}
+
+function answer(i){
+  if(document.activeElement) document.activeElement.blur();
+  answers[idx] = i;
+  if(idx < current.qs.length-1){ idx++; render(); window.scrollTo(0,0); }
+  else{ showResult(); }
+}
+
+function goBack(){
+  if(idx>0){ idx--; render(); }
+}
+
+function showResult(){
+  if(!doneIds.includes(current.id)) doneIds.push(current.id);
+  renderScList();
+
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('result').style.display='block';
+  document.getElementById('stickyCta').style.display='block';
+  document.body.classList.add('show-sticky');
+  window.scrollTo(0,0);
+
+  document.getElementById('rScenario').textContent = current.banner;
+
+  const catScore=[0,0,0,0,0], catMax=[0,0,0,0,0];
+  let total=0, unknown=0;
+  current.qs.forEach((q,i)=>{
+    const o = OPTS[answers[i]];
+    catScore[q.cat]+=o.pt; catMax[q.cat]+=2; total+=o.pt;
+    if(o.u) unknown++;
+  });
+
+  // 総合判定
+  const g = document.getElementById('grade');
+  const s = document.getElementById('rsum');
+  if(total>=17){
+    g.innerHTML='<span class="g g-a">A</span>このシナリオでは実効性が高い水準です';
+    s.innerHTML='総合 <span class="em">'+total+' / 20点</span>。計画と現場がよく結びついています。';
+  }else if(total>=11){
+    g.innerHTML='<span class="g g-b">B</span>「紙のBCP」になりかけています';
+    s.innerHTML='総合 <span class="em">'+total+' / 20点</span>。計画は存在しますが、いくつかの局面で現場が止まる可能性があります。';
+  }else{
+    g.innerHTML='<span class="g g-c">C</span>このシナリオでは、計画が発動しない恐れがあります';
+    s.innerHTML='総合 <span class="em">'+total+' / 20点</span>。策定義務は満たしていても、実効性の面で重大な空白があります。';
+  }
+
+  // 5軸バー
+  const axes = document.getElementById('axes');
+  axes.innerHTML='';
+  const rates = current.cats.map((c,i)=>catScore[i]/catMax[i]);
+  current.cats.forEach((c,i)=>{
+    const rate = rates[i];
+    const cls = rate>=0.75 ? 'f-ok' : rate>=0.5 ? 'f-mid' : 'f-low';
+    const div = document.createElement('div');
+    div.className='axis';
+    div.innerHTML =
+      '<div class="a-head"><span class="a-name">'+c.name+'</span>'+
+      '<span class="a-score">'+catScore[i]+' / '+catMax[i]+'</span></div>'+
+      '<div class="a-bar"><i class="'+cls+'" data-w="'+(rate*100)+'"></i></div>';
+    axes.appendChild(div);
+  });
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.a-bar i').forEach(el=>{
+      el.style.width = el.dataset.w + '%';
+    });
+  });
+
+  // 弱点領域（満点時は維持の観点に切り替え・同率はすべて併記）
+  const minRate = Math.min.apply(null, rates);
+  const weakBox = document.getElementById('weakBox');
+  const wLabel = weakBox.querySelector('.w-label');
+  if(minRate >= 1){
+    wLabel.textContent = '次の課題は「維持」です';
+    document.getElementById('weakName').textContent = 'すべての領域で高い水準です';
+    document.getElementById('weakDesc').textContent = 'この状態は、職員の入れ替わりや計画の経年で静かに劣化します。定期的な訓練と見直しの仕組みが、次に問われるテーマです。';
+  }else{
+    wLabel.textContent = '最初に崩れるのはここです';
+    const weakIdx = rates.map((r,i)=>r===minRate?i:-1).filter(i=>i>=0);
+    document.getElementById('weakName').textContent =
+      weakIdx.map(i=>current.cats[i].name).join('・');
+    document.getElementById('weakDesc').textContent =
+      current.cats[weakIdx[0]].desc +
+      (weakIdx.length>1 ? '（複数の領域が同じ水準です。いずれも点検の対象になります）' : '');
+  }
+
+  // わからないカウント
+  const ub = document.getElementById('unknownBox');
+  if(unknown>0){
+    ub.style.display='block';
+    document.getElementById('ucount').textContent = unknown + '件';
+  }else{
+    ub.style.display='none';
+  }
+
+  // 「できない・わからない」だった場面の一覧（持ち帰り用）
+  const sBox = document.getElementById('scenesBox');
+  const sList = document.getElementById('scenesList');
+  sList.innerHTML='';
+  const weakScenes = current.qs.filter((q,i)=>OPTS[answers[i]].u);
+  if(weakScenes.length){
+    weakScenes.forEach(q=>{
+      const li = document.createElement('li');
+      li.textContent = q.scene;
+      sList.appendChild(li);
+    });
+    sBox.style.display='block';
+  }else{
+    sBox.style.display='none';
+  }
+
+  // 次のシナリオ誘導
+  const remaining = SCENARIOS.filter(x=>!doneIds.includes(x.id));
+  const nextBox = document.getElementById('nextBox');
+  const allDone = document.getElementById('allDoneBox');
+  if(remaining.length){
+    const next = remaining[Math.floor(Math.random()*remaining.length)];
+    nextBox.style.display='block';
+    allDone.style.display='none';
+    document.getElementById('nextName').textContent = '「'+next.title+'」';
+    const btn = document.getElementById('nextBtn');
+    btn.textContent = '別のシナリオで診断する（残り'+remaining.length+'件）';
+    btn.onclick = ()=>startScenario(next);
+  }else{
+    nextBox.style.display='none';
+    allDone.style.display='block';
+  }
+}
+
+function backToTop(){
+  document.getElementById('result').style.display='none';
+  document.getElementById('stickyCta').style.display='none';
+  document.body.classList.remove('show-sticky');
+  document.getElementById('hero').style.display='block';
+  document.getElementById('facts').style.display='block';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
