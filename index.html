@@ -337,7 +337,7 @@
     <p class="picked-note" id="pickedNote"></p>
     <div class="scenario-strip" id="scList"></div>
     <button class="start-btn" id="startBtn" disabled>種別を選ぶと診断を始められます</button>
-    <p class="note">場面設定に出てくる人数・時間帯は、貴事業所の体制に読み替えてお答えください。<br>シナリオはランダムに選ばれます。回答はこの端末内でのみ処理され、外部に送信されません。</p>
+    <p class="note">場面設定に出てくる人数・時間帯は、貴事業所の体制に読み替えてお答えください。<br>シナリオはランダムに選ばれます。回答内容はこの端末内でのみ処理され、外部に送信されません。改善のため、アクセス数・流入元・どこまで進んだかといった利用状況の統計のみ取得しています。</p>
   </div>
 </section>
 
@@ -438,6 +438,98 @@
 <script>
 "use strict";
 
+/* ============================================================
+   利用状況の計測（SWMD usage log v0.1）
+
+   送るもの   ：画面の遷移（表示・種別選択・開始・結果到達・CTAクリック・離脱地点）
+                 と、流入元（referrer / ?src= / utm_* / ?type=）
+   送らないもの：各設問の回答内容、点数、判定結果、事業所を特定しうる情報
+                 （もともと入力欄がないため、個人情報・法人情報は保持していない）
+
+   LOG_ENDPOINT が空文字のあいだ、計測は完全に無効（送信も発生しない）。
+   GASのウェブアプリURLを貼った時点で有効になる。
+   計測の失敗が診断の動作に影響しないよう、全処理を try/catch で囲っている。
+   ============================================================ */
+const LOG_ENDPOINT = "https://script.google.com/macros/s/AKfycbzLIBYVQO6knnRMd8LSMay1NHNLsu5NzZiRu0ww9iDV7KUDFcxTkAd6e_U6jxJ5avPkFg/exec";   /* GASウェブアプリ */
+
+const LOG = (function(){
+  const off = !LOG_ENDPOINT;
+  const t0  = Date.now();
+  let sid = '';
+  try{
+    sid = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+        : String(Date.now()) + '-' + Math.random().toString(36).slice(2,10);
+  }catch(e){ sid = String(Date.now()) + '-' + Math.random().toString(36).slice(2,10); }
+
+  let p = null;
+  try{ p = new URLSearchParams(location.search); }catch(e){}
+  const qs = k => { try{ return (p && p.get(k)) || ''; }catch(e){ return ''; } };
+
+  let refHost = '';
+  try{ if(document.referrer) refHost = new URL(document.referrer).hostname; }catch(e){}
+
+  const base = {
+    sid       : sid,
+    ref       : document.referrer || '',
+    refHost   : refHost,
+    src       : qs('src'),
+    utmSource : qs('utm_source'),
+    utmMedium : qs('utm_medium'),
+    utmCamp   : qs('utm_campaign'),
+    typeParam : qs('type'),
+    landing   : location.pathname,
+    lang      : navigator.language || '',
+    screenW   : (window.screen && window.screen.width) || 0,
+    ua        : navigator.userAgent || ''
+  };
+
+  /* 到達地点（離脱分析用）。最後にどこまで進んだかを1行だけ送る */
+  let stage = 'top', deepest = 0, sent = false;
+
+  function post(payload){
+    if(off) return;
+    try{
+      const body = JSON.stringify(payload);
+      if(navigator.sendBeacon){
+        const blob = new Blob([body], {type:'text/plain;charset=UTF-8'});
+        if(navigator.sendBeacon(LOG_ENDPOINT, blob)) return;
+      }
+      fetch(LOG_ENDPOINT, {
+        method:'POST', mode:'no-cors', keepalive:true,
+        headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:body
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  function ev(name, extra){
+    try{
+      const d = Object.assign({}, base, extra || {});
+      d.event = name;
+      d.sec   = Math.round((Date.now() - t0) / 1000);
+      post(d);
+    }catch(e){}
+  }
+
+  /* 離脱時に1回だけ。stage は 'top' / 'quiz' / 'result' */
+  function bye(){
+    if(sent) return;
+    sent = true;
+    ev('exit', {stage:stage, detail:String(deepest)});
+  }
+  try{
+    window.addEventListener('pagehide', bye);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'hidden') bye();
+    });
+  }catch(e){}
+
+  return {
+    ev: ev,
+    setStage: function(s){ try{ stage = s; }catch(e){} },
+    mark:     function(i){ try{ if(i > deepest) deepest = i; }catch(e){} }
+  };
+})();
+
 /* 監修が未了の種別。
    DRAFT_MODE = 'badge' … 選択できるが「監修中」バッジを出す
    DRAFT_MODE = 'hide'  … 選択肢から外す（?type= での直接指定も無効になる）
@@ -513,6 +605,7 @@ function pickType(id){
     type.scenarios[0].questions.length + '問・約3分）';
   renderScList();
   try{ history.replaceState(null,'','?type='+id); }catch(e){}
+  LOG.ev('type_select', {type:id});
 }
 
 function renderScList(){
@@ -550,6 +643,9 @@ function startScenario(s){
   $('qClockNote').textContent = s.clockNote;
   render();
   window.scrollTo(0,0);
+  LOG.setStage('quiz');
+  LOG.mark(0);
+  LOG.ev('quiz_start', {type:type.typeId, scenario:s.id, detail:String(s.questions.length)});
 }
 
 function render(){
@@ -583,6 +679,7 @@ function render(){
 
 function choose(i){
   answers[idx] = i;
+  LOG.mark(idx + 1);   /* 何問目まで答えたか。選択肢の中身は送らない */
   if(idx < current.questions.length - 1){ idx++; render(); window.scrollTo(0,0); }
   else showResult();
 }
@@ -601,6 +698,13 @@ function showResult(){
   $('stickyCta').style.display = 'block';
   document.body.classList.add('show-sticky');
   window.scrollTo(0,0);
+
+  LOG.setStage('result');
+  LOG.ev('result', {
+    type     : type.typeId,
+    scenario : current.id,
+    detail   : String(doneIds.length)   /* この訪問で完了したシナリオ数 */
+  });
 
   $('rTypeTag').textContent = type.typeName;
   $('rScenario').textContent = current.banner;
@@ -726,7 +830,10 @@ function showResult(){
     $('nextName').textContent = '「' + next.title + '（' + next.clock + '）」';
     const btn = $('nextBtn');
     btn.textContent = '別のシナリオで診断する（残り' + rest.length + '件）';
-    btn.onclick = () => startScenario(next);
+    btn.onclick = () => {
+      LOG.ev('next_scenario', {type:type.typeId, scenario:next.id});
+      startScenario(next);
+    };
   }else{
     $('nextBox').style.display = 'none';
     $('allDoneBox').style.display = 'block';
@@ -746,6 +853,8 @@ function todoLi(q, cls, label){
    初期化
    ------------------------------------------------------------ */
 function backToTop(){
+  LOG.ev('retry', {type: type ? type.typeId : ''});
+  LOG.setStage('top');
   $('result').style.display = 'none';
   $('stickyCta').style.display = 'none';
   document.body.classList.remove('show-sticky');
@@ -772,6 +881,17 @@ $('retryBtn').addEventListener('click', backToTop);
 
 renderTypes();
 startLiveClock();
+
+/* 表示とCTAクリックの計測 */
+LOG.ev('view');
+document.querySelectorAll('a[href*="forms.gle"]').forEach(a => {
+  a.addEventListener('click', () => {
+    LOG.ev('cta_click', {
+      type   : type ? type.typeId : '',
+      detail : a.closest('.sticky-cta') ? 'sticky' : 'other'
+    });
+  });
+});
 
 /* ?type=xxx で種別を直接指定（FAXDM・QRの刷り分け用） */
 (function(){
