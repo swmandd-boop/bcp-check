@@ -78,6 +78,14 @@
   .facts{border-bottom:1px solid var(--line);padding:26px 0;background:var(--paper)}
   .facts p{font-size:.88rem;color:var(--sub)}
   .facts .em{color:var(--ink);font-weight:700}
+  .facts .site-firm{margin-top:18px;font-size:.85rem;color:var(--ink);font-weight:700}
+  .facts .site-lead{margin-top:2px;font-size:.85rem}
+  .facts .site-lead a{
+    color:var(--night);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;
+  }
+  .facts .site-lead a:hover{color:var(--amber)}
+  .facts .site-lead a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 
   /* ===== quiz ===== */
   .quiz{padding:36px 0 56px;display:none;background:var(--paper)}
@@ -204,6 +212,13 @@
   .cta h2{font-size:1.1rem;margin-bottom:12px}
   .cta p{font-size:.92rem;color:var(--sub);margin-bottom:20px}
   .cta .firm{font-size:.85rem;color:var(--ink);font-weight:700;margin-bottom:4px}
+  .cta .site-link{font-size:.85rem;color:var(--sub);margin-bottom:4px}
+  .cta .site-link a{
+    color:var(--night);text-decoration:underline;text-underline-offset:3px;
+    text-decoration-thickness:1px;
+  }
+  .cta .site-link a:hover{color:var(--amber)}
+  .cta .site-link a:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
   .cta .svc{
     background:#fff;border:1.5px solid var(--line);border-radius:8px;
     padding:18px 20px;margin-bottom:14px;
@@ -218,6 +233,10 @@
   footer{
     padding:28px 0 44px;border-top:1px solid var(--line);
     font-size:.75rem;color:var(--sub);background:var(--paper);
+  }
+  footer .copy{
+    display:block;margin-top:16px;text-align:center;
+    font-size:.75rem;color:var(--sub);
   }
   .sticky-cta{
     display:none;
@@ -322,7 +341,8 @@
     <b>この診断はJavaScriptを使用します。</b>
     ブラウザの設定で無効になっているか、読み込みに失敗した可能性があります。
     設定を有効にして再読み込みするか、下記よりお問い合わせください。<br>
-    <a href="https://forms.gle/nZd22V4geA5LAGVB8" target="_blank" rel="noopener">株式会社福祉マネジメント＆デザイン お問い合わせ</a>
+    <a href="https://forms.gle/nZd22V4geA5LAGVB8" target="_blank" rel="noopener">株式会社福祉マネジメント＆デザイン お問い合わせ</a><br>
+    <a href="https://swmd2023.com" target="_blank" rel="noopener">株式会社福祉マネジメント＆デザイン ホームページ</a>
   </div>
 </noscript>
 
@@ -344,6 +364,8 @@
 <section class="facts" id="facts">
   <div class="wrap">
     <p>BCPの策定は運営基準上の義務であり、未策定は<span class="em">報酬上の減算</span>につながる場合があります。ただし本当のリスクは減算ではなく、<span class="em">「策定したはずの計画が、いざというとき発動しない」</span>こと。そして——<span class="em">1つのシナリオで動けても、別のシナリオで動けるとは限らない</span>ことです。</p>
+    <p class="site-firm">株式会社福祉マネジメント＆デザイン</p>
+    <p class="site-lead"><a href="https://swmd2023.com" target="_blank" rel="noopener">研修・コンサルティングの内容を見る（弊社ホームページ）</a></p>
   </div>
 </section>
 
@@ -417,6 +439,7 @@
         <span>災害の進行を模したカードを引きながら、職員がその場で判断し、話し合う実践型の研修です。今回の診断で弱かった場面を、そのまま訓練のテーマにできます。運営基準で義務づけられたBCP研修・訓練の実施記録としても活用いただけます。</span>
       </div>
       <p class="firm">株式会社福祉マネジメント＆デザイン</p>
+      <p class="site-link"><a href="https://swmd2023.com" target="_blank" rel="noopener">研修・コンサルティングの内容を見る（弊社ホームページ）</a></p>
       <button class="retry" id="retryBtn">別の種別で診断する</button>
     </div>
   </div>
@@ -426,8 +449,8 @@
   <div class="wrap">
     本診断は一般的なBCP実効性の簡易チェックであり、法令適合性や運営指導の結果を保証するものではありません。<br>
     設問・配点・判定の区切りは、厚生労働省「介護施設・事業所における自然災害発生時の業務継続ガイドライン」および「同　感染症発生時の業務継続ガイドライン」を参考に、2026年7月時点の制度を前提としてSWMDが独自に作成した試案です。配点および判定の区切りは、外部の基準に照らして検証されたものではありません。<br>
-    <span class="ver">BCP実効性チェック v1.0（2026-07-25）</span><br>
-    &copy; 株式会社福祉マネジメント＆デザイン
+    <span class="ver">BCP実効性チェック v1.0（2026-07-25）</span>
+    <span class="copy">&copy; 株式会社福祉マネジメント＆デザイン</span>
   </div>
 </footer>
 
@@ -884,11 +907,17 @@ startLiveClock();
 
 /* 表示とCTAクリックの計測 */
 LOG.ev('view');
-document.querySelectorAll('a[href*="forms.gle"]').forEach(a => {
+document.querySelectorAll('a[href*="forms.gle"], a[href*="swmd2023.com"]').forEach(a => {
   a.addEventListener('click', () => {
-    LOG.ev('cta_click', {
+    const isSite = a.href.indexOf('swmd2023.com') >= 0;
+    const where  = a.closest('.sticky-cta') ? 'sticky'
+                 : a.closest('footer')      ? 'footer'
+                 : a.closest('.cta')        ? 'result'
+                 : a.closest('.facts')      ? 'top'
+                 : 'other';
+    LOG.ev(isSite ? 'site_click' : 'cta_click', {
       type   : type ? type.typeId : '',
-      detail : a.closest('.sticky-cta') ? 'sticky' : 'other'
+      detail : where
     });
   });
 });
